@@ -9,7 +9,7 @@
 
 #1)#############################################################Preparación de datos
 #####Prevalencia observada
-prevObs<-data.frame(prev_05_18a88,prev_09_18a88$prev,prev_13_18a88$prev)
+source("Prev+Mort+Canada.R") #alojado en git tambien
 
 #####Prev ajustadas
 #Defino edad de ajuste
