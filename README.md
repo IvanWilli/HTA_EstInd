@@ -1,2 +1,4 @@
-# HTA_EstInd
-Código utilizado para la tesis: "Hipertensión Arterial en Argentina. Transición y Mortalidad Diferencial. Una estimación indirecta a partir de datos transversales (2009-2013)".
+En este repositorio se incluyen los datos que sirvieron como insumo y el código en R utilizado para la estimación de los resultados.
+Cualquier consulta/intercambio a ivanwilliams1985@gmail.com.
+Saludos!
+Iván
