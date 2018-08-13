@@ -1,3 +1,5 @@
+###### Data a cargar para realizar la estimación
+
 #prevalencias por edad simple
 prev_09_18a88<-data.frame(
     x=18:88,
@@ -72,6 +74,7 @@ prev_09_18a88<-data.frame(
            0.645110473805388,
            0.634126718069058,
            0.607268668689617))
+
 prev_13_18a88<-data.frame(
     x=18:88,
     prev=c(0.10607339862659,
@@ -146,7 +149,7 @@ prev_13_18a88<-data.frame(
            0.552562017080114,
            0.55163369778171))
 
-#mortalidad interpolada en excel (espero rehacerlo en R algun dia)
+#mortalidad interpolada en excel (espero rehacerlo en R algún dia)
 mort_11<-data.frame(x=c(seq(0,100,5)),
                     l=c(100000.0000,
                         98591.0481,
