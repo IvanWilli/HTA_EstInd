@@ -1,13 +1,12 @@
-###############Hipertensión Arterial en Argentina######################################
-###############Transición y Mortalidad Diferencial#####################################
-###############Una estimación indirecta a partir de datos transversales (2009-2013)####
+############################## Hipertensión Arterial en Argentina ######################################
+############################## Transición y Mortalidad Diferencial #####################################
+################# Una estimación indirecta a partir de datos transversales (2009-2013) #################
 
-#Iván Williams (Jun2017)
-#1) Se preparan los datos
-#2) Supuestos y definiciones previas
-#3) Optimización
-#4) Resultados
-
+### Iván Williams (Jun2017)
+# 1) Se preparan los datos
+# 2) Supuestos y definiciones previas
+# 3) Optimización
+# 4) Resultados
 
 #1)#############################################################Preparación de datos
 
@@ -15,14 +14,15 @@
 source("Prev+Mort+Canada.R")
 
 #####Prevalencia observada
-prevObs<-data.frame(prev_05_18a88,prev_09_18a88$prev,prev_13_18a88$prev)
+prevObs <- data.frame(prev_05_18a88,prev_09_18a88$prev,prev_13_18a88$prev)
 
 #####Prev ajustadas
 #Defino edad de ajuste
 x_aj = c(30,70)
-prev3070<-data.frame(x=30:70,
+prev3070 <- data.frame(x=30:70,
                      prev09=subset(prev_09_18a88, x>=x_aj[1] & x<=x_aj[2])$prev,
                      prev13=subset(prev_13_18a88, x>=x_aj[1] & x<=x_aj[2])$prev)
+
 #Exponencial por cada año
 #09
 fitExp_09 <- lm(data= prev3070, log(prev09)~x+1)
@@ -32,23 +32,25 @@ fitExp_13 <- lm(data= prev3070, log(prev13)~x+1)
     summary(fitExp_13)$r.squared
 #Graf0913
     plot(prev3070$x,prev3070$prev09,col=2,main="Prevalencias suavizadas",xlab="Edad",ylab="Prevalencia")
-    points(prev3070$x,prev3070$prev13,col=3)
-    lines(prev3070$x,exp(predict(fitExp_09)),col=2) 
-    lines(prev3070$x,exp(predict(fitExp_13)),col=3) #ok
-
-###prev final suavizada
-x_suav=30:70
-prev09_ic<-predict(fitExp_09,newdata=data.frame(x=x_suav),interval='confidence',level=0.95,se.fit = TRUE)
-prev13_ic<-predict(fitExp_13,newdata=data.frame(x=x_suav),interval='confidence',level=0.95,se.fit = TRUE)
-prev_ic<-data.frame(x=x_suav,"09"=prev09_ic$fit,"13"=prev13_ic$fit)
+      points(prev3070$x,prev3070$prev13,col=3)
+      lines(prev3070$x,exp(predict(fitExp_09)),col=2) 
+      lines(prev3070$x,exp(predict(fitExp_13)),col=3)
+      
+###prevalencia final suavizada
+x_suav = 30:70
+prev09_ic <- predict(fitExp_09,newdata=data.frame(x=x_suav),interval='confidence',level=0.95,se.fit = TRUE)
+prev13_ic <- predict(fitExp_13,newdata=data.frame(x=x_suav),interval='confidence',level=0.95,se.fit = TRUE)
+prev_ic <- data.frame(x=x_suav,"09"=prev09_ic$fit,"13"=prev13_ic$fit)
 
 ###mortalidad
-#interpolación de tabla de mortalidad nacional 2011 (realizado en excel, pronto a incluir proceso aquí)
+#la interpolación de la tabla de mortalidad nacional a 2011 no es realizada aquí (no estimado aquí, pronto a incluir)
+
 #spline para desagregar por edad simple
 library("splines")
-spl11<-interpSpline(mort_11$x,mort_11$l)
-edades<-data.frame(x = 30:70)
-mort11<-data.frame(x=edades,q=predict(spl11,edades$x))
+spl11 <- interpSpline(mort_11$x,mort_11$l)
+edades <- data.frame(x = 30:70)
+mort11 <- data.frame(x=edades,q=predict(spl11,edades$x))
+
 #función para construir q a partir de l
 qs<-function(s)
 {   newq<-data.frame(x = 30:66,y=seq(1,37))
@@ -59,7 +61,7 @@ qs<-function(s)
     newq}
 q11<-qs(mort11)
 
-#2)#####################################supuestos y definiciones previas
+# 2)#####################################supuestos y definiciones previas
 ###set de bandas para rr y q(HTA)
 #rr
     rr_li<-c(2,1)
@@ -99,7 +101,7 @@ q11<-qs(mort11)
     x_ <-data.frame(x=seq(30,66,4))
     pred_inc<-data.frame(x=seq(30,66,4),
                       p=exp(predict(model_,x_)))
-#graf de bandas
+#gráfico de bandas
     library("ggplot2")
     incgraf<-ggplot() +
         geom_point(data = Can_df, aes(x=x, y=inc/100)) +
@@ -131,9 +133,9 @@ q11<-qs(mort11)
 
 
 #3)##########################################OPtimización
-    #función de optimización que toma como argumentos
-        #prev al 09 y su desvío standar por edad
-        #prev al 13 y su desvío standar por edad
+#función de optimización que toma como argumentos
+ #prev al 09 y su desvío standar por edad
+ #prev al 13 y su desvío standar por edad
 
 auglag_funcion<-function(prev1, prev2, prev1.se.fit, prev2.se.fit, q){
 
@@ -247,7 +249,8 @@ auglag_funcion<-function(prev1, prev2, prev1.se.fit, prev2.se.fit, q){
         return(solOK)
 }
 
-#4)###########################################Resultados: estimación 0913
+# 4)###########################################Resultados: estimación 0913
+
 library("alabama")
 set.seed(2378)
 solOk_0913<-data.frame(a1=NA,b1=NA,a2=NA,b2=NA,c2=NA,
@@ -273,7 +276,8 @@ inc_0913<-data.frame();rr_0913<-data.frame()
             rr_0913[i,ord]<-rr(j)
             ord<-ord+1}
     }
-##Media,Mediana y percentiles de ambas funciones
+
+##Media, Mediana y percentiles de ambas funciones
 quantfun97.5 <- function(x) (quantile(x, 0.975))
 quantfun2.5 <- function(x) (quantile(x, 0.025))
 inc_0913_CI<-data.frame(x=30:66,
@@ -289,18 +293,16 @@ rr_0913_CI<-data.frame(x=30:66,
                        , up=apply(X=rr_0913, MARGIN = 2, FUN = quantfun97.5)
 )
 
-
-
 ###Gráfico de ajuste final
-    prev09_g<-data.frame(x, exp(prev09_ic$fit[,1:3]))
-    prev13_g<-data.frame(x, exp(prev13_ic$fit[,1:3]))
-    Noprev09<-1-prev09_g$fit
-    Noprev13<-1-prev13_g$fit
-    Noprev13_estim<-data.frame()
-    x<-34:70
+    prev09_g <- data.frame(x, exp(prev09_ic$fit[,1:3]))
+    prev13_g <- data.frame(x, exp(prev13_ic$fit[,1:3]))
+    Noprev09 <- 1-prev09_g$fit
+    Noprev13 <- 1-prev13_g$fit
+    Noprev13_estim <- data.frame()
+    x = 34:70
     library(ggplot2)
-    graf_aj_0913<-function(Noprev09,inc_0913,rr_0913,q11){
-        graf<-ggplot()
+    graf_aj_0913 <- function(Noprev09,inc_0913,rr_0913,q11){
+        graf <- ggplot()
         # j las simulaciones
         # i las edades
         for (j in 1:200){
@@ -321,23 +323,24 @@ rr_0913_CI<-data.frame(x=30:66,
             graf<-graf+geom_point(data=data1,
                                   aes(x=edad,y=prev),color="red",alpha=0.1)
         }
-        graf<-graf+geom_line(data=data.frame(edad=x[1:37],prev=exp(prev13_ic$fit[,1][5:41])*100),
+        graf <- graf+geom_line(data=data.frame(edad=x[1:37],prev=exp(prev13_ic$fit[,1][5:41])*100),
                              aes(x=edad,y=prev),color="black",linetype="dashed")    
-        graf<-graf+geom_point(data=prev_13_18a88[17:53,],
+        graf <- graf+geom_point(data=prev_13_18a88[17:53,],
                               aes(x=x,y=prev*100),color="grey")
         return(graf)
     }
-    grafaj0913<-graf_aj_0913(Noprev09,inc_0913,rr_0913,q11)
-    grafaj0913<-grafaj0913+
+    grafaj0913 <- graf_aj_0913(Noprev09,inc_0913,rr_0913,q11)
+    grafaj0913 <- grafaj0913+
         ggtitle("Prevalencia estimada por edad como reultado del modelo. Total del país. Año 2013")+labs(x="Edad",y="%")+
         theme(plot.title = element_text(size = 10),
           axis.text=element_text(size=9),
           axis.title=element_text(size=10))
     
-###cuadro y gráfico ppales de cada función
+
+###Cuadro y gráfico ppales de cada función
     x=30:66
     library(ggplot2)
-    gInc0913<-ggplot()+
+    gInc0913 <- ggplot()+
         geom_line(data=as.data.frame(inc_0913_CI), aes(y=log(media*100),x=x), color="red")+
         geom_line(data=as.data.frame(inc_0913_CI), aes(y=log(mediana*100),x=x), color="red", alpha=0.8, linetype="12345678")+
         geom_line(data=as.data.frame(inc_0913_CI), aes(y=log(lwr*100),x=x), color="red", alpha=0.5, linetype="dashed")+
@@ -369,12 +372,12 @@ rr_0913_CI<-data.frame(x=30:66,
 ####esperanza de vida de HTA 09-11
 
 #mortalidad resultante: HTA y no HTA
-q11_NoHTA<-q11[,2]/(Noprev09[1:37]+(1-Noprev09[1:37])*rr_0913_CI$mediana)
-q11_HTA<-q11_NoHTA*rr_0913_CI$mediana
+q11_NoHTA <- q11[,2]/(Noprev09[1:37]+(1-Noprev09[1:37])*rr_0913_CI$mediana)
+q11_HTA <- q11_NoHTA*rr_0913_CI$mediana
     plot(x[1:37],q11_NoHTA, ylim=c(0,0.15))
     points(x[1:37],q11_HTA,col=2)
 #obtener lx a partir de qx
-tabla_l<-function(q)
+tabla_l <- function(q)
 {
     l<-rep(0,11)
     l[1]<-100000
@@ -392,12 +395,12 @@ plot(seq(30,70,4),l11_NoHTA,ylim = c(0,100000));points(seq(30,70,4),l11_HTA,col=
 
 #desagrego por edad simple con spline de lx
 library("splines")
-l11_HTA_spl<-interpSpline(seq(30,70,4),l11_HTA)
-l11_HTA_splp<-data.frame(x=30:70,l=predict(l11_HTA_spl,30:70)[[2]])
-l11_NoHTA_spl<-interpSpline(seq(30,70,4),l11_NoHTA)
-l11_NoHTA_splp<-data.frame(x=30:70,l=predict(l11_NoHTA_spl,30:70)[[2]])
-l11_spl<-interpSpline(seq(30,70,4),l11)
-l11_splp<-data.frame(x=30:70,l=predict(l11_spl,30:70)[[2]])
+l11_HTA_spl <- interpSpline(seq(30,70,4),l11_HTA)
+l11_HTA_splp <- data.frame(x=30:70,l=predict(l11_HTA_spl,30:70)[[2]])
+l11_NoHTA_spl <- interpSpline(seq(30,70,4),l11_NoHTA)
+l11_NoHTA_splp <- data.frame(x=30:70,l=predict(l11_NoHTA_spl,30:70)[[2]])
+l11_spl <- interpSpline(seq(30,70,4),l11)
+l11_splp <- data.frame(x=30:70,l=predict(l11_spl,30:70)[[2]])
 #gráf    
     plot(30:70,l11_HTA_splp$l);points(seq(30, 70, 4),l11_HTA,col=2)
     lsplines<-data.frame(x=30:70,l11_splp[,2],l11_HTA_splp[,2],l11_NoHTA_splp[,2])  ###OK
