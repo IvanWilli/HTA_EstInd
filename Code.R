@@ -13,8 +13,9 @@
 #levanto data 
 source("Prev+Mort+Canada.R")
 
+
 #####Prevalencia observada
-prevObs <- data.frame(prev_05_18a88,prev_09_18a88$prev,prev_13_18a88$prev)
+prevObs <- data.frame(prev_09_18a88$prev,prev_13_18a88$prev)
 
 #####Prev ajustadas
 #Defino edad de ajuste
@@ -255,7 +256,8 @@ library("alabama")
 set.seed(2378)
 solOk_0913<-data.frame(a1=NA,b1=NA,a2=NA,b2=NA,c2=NA,
                        con=NA, val=NA, err=NA)
-for (i in 1:500){
+n_sim=20
+for (i in 1:n_sim){
     sol0913<-auglag_funcion(exp(prev09_ic$fit[,1]), exp(prev13_ic$fit[,1]), 
                             prev09_ic$se.fit, prev13_ic$se.fit, q11[,2])
     solOk_0913[i,]<-head(sol0913[order(sol0913$val),],2)[1,]
@@ -294,18 +296,18 @@ rr_0913_CI<-data.frame(x=30:66,
 )
 
 ###Gráfico de ajuste final
-    prev09_g <- data.frame(x, exp(prev09_ic$fit[,1:3]))
-    prev13_g <- data.frame(x, exp(prev13_ic$fit[,1:3]))
+    prev09_g <- data.frame(x=30:70, exp(prev09_ic$fit[,1:3]))
+    prev13_g <- data.frame(x=30:70, exp(prev13_ic$fit[,1:3]))
     Noprev09 <- 1-prev09_g$fit
     Noprev13 <- 1-prev13_g$fit
     Noprev13_estim <- data.frame()
-    x = 34:70
+    x = 34:70 
     library(ggplot2)
     graf_aj_0913 <- function(Noprev09,inc_0913,rr_0913,q11){
         graf <- ggplot()
         # j las simulaciones
         # i las edades
-        for (j in 1:200){
+        for (j in 1:n_sim){
             #j=1
             Noprev13_estim[j,1]<-0
             Noprev13_estim[j,2]<-0
@@ -391,7 +393,9 @@ l11_HTA<-tabla_l(q11_HTA[seq(1,37,4)])
 l11_NoHTA<-tabla_l(q11_NoHTA[seq(1,37,4)])
 l11<-tabla_l(q11[seq(1,37,4),2])
 l<-data.frame(l11,l11_NoHTA,l11_HTA)
-plot(seq(30,70,4),l11_NoHTA,ylim = c(0,100000));points(seq(30,70,4),l11_HTA,col=2);points(seq(30,70,4),l11,col=3)
+plot(seq(30,70,4),l11_NoHTA,ylim = c(0,100000))
+  points(seq(30,70,4),l11_HTA,col=2)
+  points(seq(30,70,4),l11,col=3)
 
 #desagrego por edad simple con spline de lx
 library("splines")
@@ -511,6 +515,6 @@ plot(Noinc2$x[1:40],Noinc2$dinc[1:40],type="l",col=2,ylim=c(0,2000),
     lines(Noinc2$x[1:40],Noinc2$dmort[1:40],col=1,ylim=c(0,2000), 
      xlab="Edad",ylab=expression(~d[x]), lwd=3)
     title("Salidas desde el estado sin HTA. Cohorte hipotética.\nTotal del País. Período 2009/13",cex.main = 0.8)
-    legend(locator(1), c(expression(~d[x]~~""~a~""~HTA),
+    legend("topleft", c(expression(~d[x]~~""~a~""~HTA),
                     expression(~d[x]~""~a~""~Muerte)),
                     col = c(2,1),text.col = "black", lty=c(1,1), cex = 0.6, bty = "n")
